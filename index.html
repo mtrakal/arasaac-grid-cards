@@ -188,8 +188,8 @@
                 selectedContainer.appendChild(keywordText);
                 selectedContainer.appendChild(img);
 
-                // Display edit button only when both image and keyword are present
-                if (imageData.keywords.length > 0) {
+                // Display edit button only when keyword text is not empty
+                if (imageData.keywords.length > 0 && imageData.keywords[0].keyword.trim() !== "") {
                     const editButton = document.createElement("div");
                     editButton.className = "edit-btn";
                     editButton.innerHTML = "&#9998;";
