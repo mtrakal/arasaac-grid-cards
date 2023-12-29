@@ -26,6 +26,7 @@
             overflow: hidden;
             display: flex;
             flex-direction: column;
+            padding: 5px; /* Added padding for image */
         }
 
         .image {
@@ -52,6 +53,14 @@
             border: none;
             padding: 4px;
             box-sizing: border-box;
+            z-index: 3; /* Ensure search input is on top */
+        }
+
+        .edit-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            cursor: pointer;
         }
 
         .preview-container {
@@ -166,16 +175,22 @@
             if (selectedContainer) {
                 selectedContainer.innerHTML = ""; // Clear the selected container
 
-                const img = document.createElement("img");
-                img.className = "image";
-                img.src = `${imageBaseUrl}${imageData._id}/${imageData._id}_500.png`;
-
                 const keywordText = document.createElement("div");
                 keywordText.className = "keyword-text";
                 keywordText.textContent = imageData.keywords.length > 0 ? imageData.keywords[0].keyword.toUpperCase() : "";
 
-                selectedContainer.appendChild(img);
+                const img = document.createElement("img");
+                img.className = "image";
+                img.src = `${imageBaseUrl}${imageData._id}/${imageData._id}_500.png`;
+
+                const editButton = document.createElement("div");
+                editButton.className = "edit-btn";
+                editButton.innerHTML = "&#9998;";
+                editButton.addEventListener("click", () => editKeyword(selectedContainer, imageData.keywords[0].keyword));
+
                 selectedContainer.appendChild(keywordText);
+                selectedContainer.appendChild(img);
+                selectedContainer.appendChild(editButton);
 
                 previewDialog.style.display = "none";
             }
@@ -199,7 +214,13 @@
             searchInput.placeholder = "Type your search...";
             searchInput.addEventListener("input", handleSearchInput);
 
+            const editButton = document.createElement("div");
+            editButton.className = "edit-btn";
+            editButton.innerHTML = "&#9998;";
+            editButton.addEventListener("click", () => editKeyword(emptyContainer));
+
             emptyContainer.appendChild(searchInput);
+            emptyContainer.appendChild(editButton);
             imageGrid.appendChild(emptyContainer);
         }
 
@@ -212,6 +233,26 @@
 
             // Select the clicked container
             container.classList.add("selected");
+        };
+
+        const editKeyword = (container, currentKeyword = "") => {
+            const keywordInput = document.createElement("input");
+            keywordInput.type = "text";
+            keywordInput.value = currentKeyword;
+            keywordInput.addEventListener("keydown", (event) => {
+                if (event.key === "Enter") {
+                    event.preventDefault();
+                    container.querySelector(".keyword-text").textContent = keywordInput.value.toUpperCase();
+                    keywordInput.blur();
+                }
+            });
+
+            keywordInput.addEventListener("blur", () => {
+                container.removeChild(keywordInput);
+            });
+
+            container.appendChild(keywordInput);
+            keywordInput.focus();
         };
 
         const addCloseButton = () => {
