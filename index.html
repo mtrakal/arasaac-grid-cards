@@ -57,6 +57,7 @@
         }
 
         .edit-btn {
+            display: none;
             position: absolute;
             top: 5px;
             right: 5px;
@@ -183,14 +184,17 @@
                 img.className = "image";
                 img.src = `${imageBaseUrl}${imageData._id}/${imageData._id}_500.png`;
 
-                const editButton = document.createElement("div");
-                editButton.className = "edit-btn";
-                editButton.innerHTML = "&#9998;";
-                editButton.addEventListener("click", () => editKeyword(selectedContainer, imageData.keywords[0].keyword));
-
                 selectedContainer.appendChild(keywordText);
                 selectedContainer.appendChild(img);
-                selectedContainer.appendChild(editButton);
+
+                // Display edit button only when both image and keyword are present
+                if (imageData.keywords.length > 0) {
+                    const editButton = document.createElement("div");
+                    editButton.className = "edit-btn";
+                    editButton.innerHTML = "&#9998;";
+                    editButton.addEventListener("click", () => editKeyword(selectedContainer, imageData.keywords[0].keyword));
+                    selectedContainer.appendChild(editButton);
+                }
 
                 previewDialog.style.display = "none";
             }
@@ -214,13 +218,7 @@
             searchInput.placeholder = "Type your search...";
             searchInput.addEventListener("input", handleSearchInput);
 
-            const editButton = document.createElement("div");
-            editButton.className = "edit-btn";
-            editButton.innerHTML = "&#9998;";
-            editButton.addEventListener("click", () => editKeyword(emptyContainer));
-
             emptyContainer.appendChild(searchInput);
-            emptyContainer.appendChild(editButton);
             imageGrid.appendChild(emptyContainer);
         }
 
