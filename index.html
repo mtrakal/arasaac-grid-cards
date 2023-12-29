@@ -19,7 +19,7 @@
         .image-container {
             position: relative;
             width: 100%;
-            height: 0;
+            height: 100%;
             padding-bottom: 100%;
             border: 2px solid black;
             margin: 4px;
@@ -189,10 +189,11 @@
                 selectedContainer.appendChild(img);
 
                 // Display edit button only when keyword text is not empty
-                if (imageData.keywords.length > 0 && imageData.keywords[0].keyword.trim() !== "") {
+                if (keywordText.textContent !== "") {
                     const editButton = document.createElement("div");
                     editButton.className = "edit-btn";
                     editButton.innerHTML = "&#9998;";
+                    editButton.style.display = "block";
                     editButton.addEventListener("click", () => editKeyword(selectedContainer, imageData.keywords[0].keyword));
                     selectedContainer.appendChild(editButton);
                 }
