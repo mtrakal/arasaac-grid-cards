@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,17 +11,27 @@
             margin: 20px;
         }
 
+        @media print {
+
+            .no-print,
+            .no-print * {
+                display: none !important;
+            }
+        }
+
         #image-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
+            gap: 20px;
         }
 
         .image-container {
             position: relative;
-            width: 100%; /* Set width to 100% to occupy the entire column */
+            width: 100%;
+            /* Set width to 100% to occupy the entire column */
             height: 0;
-            padding-bottom: 100%; /* 4x4cm aspect ratio */
+            padding-bottom: 100%;
+            /* 4x4cm aspect ratio */
             border: 2px solid black;
             margin: 4px;
             overflow: hidden;
@@ -115,6 +126,7 @@
         }
     </style>
 </head>
+
 <body>
     <div id="image-grid"></div>
     <div id="preview-dialog"></div>
@@ -182,9 +194,10 @@
                 keywordText.textContent = imageData.keywords.length > 0 ? imageData.keywords[0].keyword.toUpperCase() : "";
 
                 const imgContainer = document.createElement("div");
+                imgContainer.className = "image";
 
                 const img = document.createElement("img");
-                img.className = "image";
+                // img.className = "image";
                 img.src = `${imageBaseUrl}${imageData._id}/${imageData._id}_500.png`;
 
                 selectedContainer.appendChild(keywordText);
@@ -194,7 +207,7 @@
                 // Display edit button only when keyword text is not empty
                 if (keywordText.textContent !== "") {
                     const editButton = document.createElement("div");
-                    editButton.className = "edit-btn";
+                    editButton.className = "edit-btn no-print";
                     editButton.innerHTML = "&#9998;";
                     editButton.style.display = "block";
                     editButton.addEventListener("click", () => editKeyword(selectedContainer, imageData.keywords[0].keyword));
@@ -219,7 +232,7 @@
             emptyContainer.addEventListener("click", () => selectImageContainer(emptyContainer));
 
             const searchInput = document.createElement("input");
-            searchInput.className = "search-input";
+            searchInput.className = "search-input no-print";
             searchInput.placeholder = "Type your search...";
             searchInput.addEventListener("input", handleSearchInput);
 
@@ -291,4 +304,5 @@
         });
     </script>
 </body>
+
 </html>
