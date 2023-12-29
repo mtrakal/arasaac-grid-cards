@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Grid</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        #image-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .image-container {
+            position: relative;
+            width: 100%;
+            height: 0;
+            padding-bottom: 100%;
+            border: 2px solid black;
+            margin: 4px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
+        }
+
+        .keyword-text {
+            margin-top: auto;
+            text-align: center;
+            text-transform: uppercase;
+            z-index: 2;
+            background-color: white;
+            padding: 4px;
+        }
+
+        .search-input {
+            position: absolute;
+            bottom: 0;
+            width: calc(100% - 4px);
+            margin: 0;
+            border: none;
+            padding: 4px;
+            box-sizing: border-box;
+        }
+
+        .preview-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .preview {
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: border-color 0.3s ease-in-out;
+        }
+
+        .preview:hover {
+            border-color: blue;
+        }
+
+        #preview-dialog {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px;
+            background-color: white;
+            border: 2px solid black;
+            z-index: 1000;
+            overflow-y: auto;
+            max-height: 80%;
+        }
+
+        #preview-dialog img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            margin-bottom: 10px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: border-color 0.3s ease-in-out;
+        }
+
+        #close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div id="image-grid"></div>
+    <div id="preview-dialog"></div>
+
+    <script>
+        const debounce = (func, delay) => {
+            let timeoutId;
+            return (...args) => {
+                if (timeoutId) {
+                    clearTimeout(timeoutId);
+                }
+                timeoutId = setTimeout(() => {
+                    func.apply(null, args);
+                }, delay);
+            };
+        };
+
+        const apiUrl = "https://api.arasaac.org/v1/pictograms/cs/search/";
+        const imageBaseUrl = "https://static.arasaac.org/pictograms/";
+
+        const imageGrid = document.getElementById("image-grid");
+        const previewDialog = document.getElementById("preview-dialog");
+
+        const fetchImages = async (searchTerm) => {
+            try {
+                const response = await fetch(apiUrl + encodeURIComponent(searchTerm));
+                const data = await response.json();
+                displayPreviews(data);
+            } catch (error) {
+                console.error("Error fetching images:", error);
+            }
+        };
+
+        const displayPreviews = (data) => {
+            previewDialog.innerHTML = "";
+
+            const previewContainer = document.createElement("div");
+            previewContainer.className = "preview-container";
+
+            data.forEach((imageData) => {
+                const img = document.createElement("img");
+                img.src = `${imageBaseUrl}${imageData._id}/${imageData._id}_500.png`;
+                img.alt = imageData.keywords.length > 0 ? imageData.keywords[0].keyword : "";
+                img.addEventListener("click", () => showSelectedImage(imageData));
+
+                const previewItem = document.createElement("div");
+                previewItem.className = "preview";
+                previewItem.appendChild(img);
+
+                previewContainer.appendChild(previewItem);
+            });
+
+            previewDialog.appendChild(previewContainer);
+            addCloseButton();
+            previewDialog.style.display = "block";
+        };
+
+        const showSelectedImage = (imageData) => {
+            const selectedContainer = document.querySelector(".selected");
+            if (selectedContainer) {
+                selectedContainer.innerHTML = ""; // Clear the selected container
+
+                const img = document.createElement("img");
+                img.className = "image";
+                img.src = `${imageBaseUrl}${imageData._id}/${imageData._id}_500.png`;
+
+                const keywordText = document.createElement("div");
+                keywordText.className = "keyword-text";
+                keywordText.textContent = imageData.keywords.length > 0 ? imageData.keywords[0].keyword.toUpperCase() : "";
+
+                selectedContainer.appendChild(img);
+                selectedContainer.appendChild(keywordText);
+
+                previewDialog.style.display = "none";
+            }
+        };
+
+        const handleSearchInput = debounce((event) => {
+            const searchTerm = event.target.value.trim();
+            if (searchTerm.length > 0) {
+                fetchImages(searchTerm);
+            }
+        }, 1000);
+
+        // Initialize the grid with empty placeholders
+        for (let i = 0; i < 16; i++) {
+            const emptyContainer = document.createElement("div");
+            emptyContainer.className = "image-container";
+            emptyContainer.addEventListener("click", () => selectImageContainer(emptyContainer));
+
+            const searchInput = document.createElement("input");
+            searchInput.className = "search-input";
+            searchInput.placeholder = "Type your search...";
+            searchInput.addEventListener("input", handleSearchInput);
+
+            emptyContainer.appendChild(searchInput);
+            imageGrid.appendChild(emptyContainer);
+        }
+
+        const selectImageContainer = (container) => {
+            // Deselect previously selected container
+            const selectedContainer = document.querySelector(".selected");
+            if (selectedContainer) {
+                selectedContainer.classList.remove("selected");
+            }
+
+            // Select the clicked container
+            container.classList.add("selected");
+        };
+
+        const addCloseButton = () => {
+            const closeButton = document.createElement("div");
+            closeButton.id = "close-btn";
+            closeButton.innerHTML = "&times;";
+            closeButton.addEventListener("click", () => {
+                previewDialog.style.display = "none";
+                const selectedContainer = document.querySelector(".selected");
+                if (selectedContainer) {
+                    const searchInput = selectedContainer.querySelector(".search-input");
+                    if (searchInput) {
+                        searchInput.focus();
+                    }
+                }
+            });
+
+            previewDialog.appendChild(closeButton);
+        };
+
+        // Close the preview dialog if clicked outside of it
+        window.addEventListener("click", (event) => {
+            if (event.target === previewDialog) {
+                previewDialog.style.display = "none";
+                const selectedContainer = document.querySelector(".selected");
+                if (selectedContainer) {
+                    const searchInput = selectedContainer.querySelector(".search-input");
+                    if (searchInput) {
+                        searchInput.focus();
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
