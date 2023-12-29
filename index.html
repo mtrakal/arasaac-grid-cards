@@ -18,15 +18,15 @@
 
         .image-container {
             position: relative;
-            width: 100%;
-            height: 100%;
-            padding-bottom: 100%;
+            width: 100%; /* Set width to 100% to occupy the entire column */
+            height: 0;
+            padding-bottom: 100%; /* 4x4cm aspect ratio */
             border: 2px solid black;
             margin: 4px;
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            padding: 5px; /* Added padding for image */
+            margin: 5px;
         }
 
         .image {
@@ -53,7 +53,7 @@
             border: none;
             padding: 4px;
             box-sizing: border-box;
-            z-index: 3; /* Ensure search input is on top */
+            z-index: 3;
         }
 
         .edit-btn {
@@ -62,7 +62,7 @@
             top: 5px;
             right: 5px;
             cursor: pointer;
-            z-index: 4; /* Ensure edit button is on top */
+            z-index: 4;
         }
 
         .preview-container {
@@ -181,12 +181,15 @@
                 keywordText.className = "keyword-text";
                 keywordText.textContent = imageData.keywords.length > 0 ? imageData.keywords[0].keyword.toUpperCase() : "";
 
+                const imgContainer = document.createElement("div");
+
                 const img = document.createElement("img");
                 img.className = "image";
                 img.src = `${imageBaseUrl}${imageData._id}/${imageData._id}_500.png`;
 
                 selectedContainer.appendChild(keywordText);
-                selectedContainer.appendChild(img);
+                imgContainer.appendChild(img);
+                selectedContainer.appendChild(imgContainer);
 
                 // Display edit button only when keyword text is not empty
                 if (keywordText.textContent !== "") {
