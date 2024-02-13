@@ -268,7 +268,7 @@
                 if (event.key === "Enter" || event.keyCode === 13) {
                     // Cancel the default action, if needed
                     event.preventDefault();
-                    container.querySelector(".keyword-text").textContent = keywordInput.value.trim.toUpperCase();
+                    container.querySelector(".keyword-text").textContent = keywordInput.value.trim().toUpperCase();
                     keywordInput.blur();
                 }
             });
